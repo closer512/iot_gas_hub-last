@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alerts and Notifications</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='alarts.css') }}"> <!-- 引入外部CSS -->
+    <script>
+        // 验证 Gas Level 是否为数字，验证邮箱和联系电话格式
+        function validateForm() {
+            var gasLevel = document.forms["addForm"]["gas_level"].value;
+            var email = document.forms["addForm"]["email_address"].value;
+            var contactNumber = document.forms["addForm"]["contact_number"].value;
+
+            if (isNaN(gasLevel) || gasLevel.trim() === "") {
+                alert("Please enter a valid number for Gas Levels.");
+                return false;
+            }
+
+            if (!validateEmail(email)) {
+                alert("Please enter a valid email address.");
+                return false;
+            }
+
+            if (!validatePhoneNumber(contactNumber)) {
+                alert("Please enter a valid contact number.");
+                return false;
+            }
+
+            return true;
+        }
+
+        function validateEmail(email) {
+            var re = /\S+@\S+\.\S+/;
+            return re.test(email);
+        }
+
+        function validatePhoneNumber(number) {
+            var phoneRe = /^[0-9]{10,15}$/;
+            return phoneRe.test(number);
+        }
+    </script>
+</head>
+<body>
+
+    <header>
+        <nav>
+            <ul>
+                <li><button id="dashboardBtn">Dashboard Page</button></li>
+                <li><button id="notificationsBtn">Alerts and Information Page</button></li>
+                <li><button id="dataBtn">Data Page</button></li>
+                <li><button id="loginBtn">Login Page</button></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="main">
+        <!-- 查询表单 -->
+        <form method="get" action="{{ url_for('alerts') }}">
+            <label for="sensor_id">Sensor ID:</label>
+            <input type="text" name="sensor_id" id="sensor_id" value="{{ request.args.get('sensor_id', '') }}">
+        
+            <label for="address">Address:</label>
+            <input type="text" name="address" id="address" value="{{ request.args.get('address', '') }}">
+        
+            <label for="email_address">Email Address:</label>
+            <input type="email" name="email_address" id="email_address" value="{{ request.args.get('email_address', '') }}">
+        
+            <label for="contact_number">Contact Number:</label>
+            <input type="text" name="contact_number" id="contact_number" value="{{ request.args.get('contact_number', '') }}">
+        
+            <label for="gas_type">Gas Type:</label>
+            <input type="text" name="gas_type" id="gas_type" value="{{ request.args.get('gas_type', '') }}">
+        
+            <label for="time">Time:</label>
+            <input type="datetime-local" name="time" id="time" value="{{ request.args.get('time', '') }}">
+        
+            <label for="gas_level">Gas Levels:</label>
+            <input type="text" name="gas_level" id="gas_level" value="{{ request.args.get('gas_level', '') }}">
+        
+            <label for="gas_data">Gas Data:</label>
+            <input type="text" name="gas_data" id="gas_data" value="{{ request.args.get('gas_data', '') }}">
+        
+            <input type="submit" value="Search Alerts">
+        </form>
+        
+
+        <!-- 表格 -->
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>Number<br><input type="text" id="numberSearch" placeholder="Search Number" onkeypress="handleEnter(event)"></th>
+                    <th>Sensor ID<br><input type="text" id="sensorSearch" placeholder="Search Sensor ID" onkeypress="handleEnter(event)"></th>
+                    <th>Address<br><input type="text" id="addressSearch" placeholder="Search Address" onkeypress="handleEnter(event)"></th>
+                    <th>Email Address<br><input type="text" id="emailSearch" placeholder="Search Email" onkeypress="handleEnter(event)"></th>
+                    <th>Contact Number<br><input type="text" id="contactSearch" placeholder="Search Contact" onkeypress="handleEnter(event)"></th>
+                    <th>Type of Gas<br><input type="text" id="gasTypeSearch" placeholder="Search Gas Type" onkeypress="handleEnter(event)"></th>
+                    <th>Time<br><input type="text" id="timeSearch" placeholder="Search Time" onkeypress="handleEnter(event)"></th>
+                    <th>Gas Levels<br><input type="text" id="gasLevelSearch" placeholder="Search Gas Level" onkeypress="handleEnter(event)"></th>
+                    <th>Gas Data<br><input type="text" id="gasDataSearch" placeholder="Search Gas Data" onkeypress="handleEnter(event)"></th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="alerts">
+                {% for entry in alert_data %}
+                <tr>
+                    <td>{{ entry.id }}</td>
+                    <td>{{ entry.sensor_id }}</td>
+                    <td>{{ entry.address }}</td>
+                    <td>{{ entry.email_address }}</td>
+                    <td>{{ entry.contact_number }}</td>
+                    <td>{{ entry.gas_type }}</td>
+                    <td>{{ entry.time }}</td>
+                    <td>{{ entry.gas_level }}</td>
+                    <td>{{ entry.gas_data }}</td>
+                    <td>
+                        <!-- 编辑功能 -->
+                        <a href="{{ url_for('edit', id=entry.id) }}">Edit</a>
+                        <!-- 删除按钮 -->
+                        <form action="{{ url_for('delete', id=entry.id) }}" method="POST" style="display:inline;">
+                            <button type="submit" onclick="return confirm('Are you sure you want to delete this entry?');">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        <script>
+            function handleEnter(event) {
+                // 检查是否按下了回车键
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    submitSearch();
+                }
+            }
+        
+            function submitSearch() {
+                const sensorId = document.getElementById('sensorSearch').value;
+                const address = document.getElementById('addressSearch').value;
+                const emailAddress = document.getElementById('emailSearch').value;
+                const contactNumber = document.getElementById('contactSearch').value;
+                const gasType = document.getElementById('gasTypeSearch').value;
+                const time = document.getElementById('timeSearch').value;
+                const gasLevel = document.getElementById('gasLevelSearch').value;
+                const gasData = document.getElementById('gasDataSearch').value;
+        
+                // 构建查询字符串
+                const query = `?sensor_id=${sensorId}&address=${address}&email_address=${emailAddress}&contact_number=${contactNumber}&gas_type=${gasType}&time=${time}&gas_level=${gasLevel}&gas_data=${gasData}`;
+        
+                // 重定向到带有查询参数的 URL
+                window.location.href = '{{ url_for('alerts') }}' + query;
+            }
+        </script>
+        
+
+        <!-- 添加新数据表单 -->
+        <h2>Add New Entry</h2>
+        <form name="addForm" method="post" action="{{ url_for('add_data') }}" onsubmit="return validateForm()">
+            <label>Sensor ID: <input type="text" name="sensor_id" placeholder="Enter Sensor ID" required></label><br>
+            <label>Address: <input type="text" name="address" placeholder="Enter Address" required></label><br>
+            <label>Email Address: <input type="email" name="email_address" placeholder="Enter Email Address" required></label><br>
+            <label>Contact Number: <input type="tel" name="contact_number" placeholder="Enter Contact Number" required></label><br>
+            <label>Type of Gas: <input type="text" name="gas_type" placeholder="Enter Gas Type" required></label><br>
+            <label>Time: <input type="datetime-local" name="time" placeholder="Enter Time" required></label><br>
+            <label>Gas Levels: <input type="text" name="gas_level" placeholder="Enter Gas Levels" required></label><br>
+            <label>Gas Data: <input type="text" name="gas_data" placeholder="Enter Gas Data" required></label><br>
+            <input type="submit" value="Add Entry">
+        </form>
+    </main>
+
+</body>
+</html>

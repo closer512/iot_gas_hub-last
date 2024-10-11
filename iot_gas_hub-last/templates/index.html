@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time Gas Level Monitoring</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <!-- 引入 Chart.js 和 Gauge.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://bernii.github.io/gauge.js/dist/gauge.min.js"></script> 
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><button id="dashboardBtn">Dashboard Page</button></li>
+                <li><button id="notificationsBtn">Alerts and Information Page</button></li> <!-- 点击后跳转 -->
+                <li><button id="dataBtn">Data Page</button></li>
+                <li><button id="loginBtn">Login Page</button></li>
+            </ul>
+        </nav>
+    </header>
+    
+
+    <main>
+        <!-- 趋势图显示区域 -->
+        <section id="trend-graph">
+            <h3>Trend Graph Showing Gas Levels Over Time</h3>
+            <canvas id="trendChart" width="400" height="200"></canvas>
+        </section>
+
+        <!-- 列表显示区域 -->
+        <section id="alerts">
+            <h3>Important Alerts and Notifications</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Sensor</th>
+                        <th>Time</th>
+                        <th>Address</th>
+                        <th>Gas levels</th> <!-- 这里只显示一种气体浓度 -->
+                    </tr>
+                </thead>
+                <tbody id="alertsTableBody">
+                    <!-- 动态生成的数据行将插入这里 -->
+                </tbody>
+            </table>
+        </section>
+        
+
+        <!-- 仪表盘显示区域 -->
+        <section id="gas-level">
+            <h2>Current Gas Level</h2>
+            <canvas id="gaugeChart" width="400" height="200"></canvas>
+            <p id="gasValue"></p>
+            <p id="statusText"></p>
+        </section>
+
+        <!-- Peak Gas Levels 显示区域 -->
+        <section id="peak-gas-levels">
+            <h3>Peak Gas Levels</h3>
+            <div id="today">Loading...</div>
+            <div id="month">Loading...</div>
+            <div id="history">Loading...</div>
+        </section>
+
+    </main>
+
+    <!-- 引用外部的 JavaScript 文件 -->
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    
+</body>
+</html>
+
+

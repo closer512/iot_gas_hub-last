@@ -1,0 +1,219 @@
+#include <WiFi.h>
+#include <HTTPClient.h>
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+#include <ESP32Servo.h>
+
+#define MQ5_PIN 36   
+#define LED_PIN 5  
+#define BUZZER_PIN 17       
+#define GAS_THRESHOLD 2000
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
+
+#define OLED_RESET -1  
+
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+Servo myservo;
+
+// WiFi configuration
+const char* ssid = "leslie";         // WiFi SSID
+const char* password = "19950313"; // WiFi password
+
+// NTP server
+const char* ntpServer = "time.nist.gov";  
+const long  gmtOffset_sec = 8 * 3600;  // UTC +8
+const int   daylightOffset_sec = 0;    // No daylight savings
+
+int pos = 0;    // variable to store the servo position
+int servoPin = 16;
+
+WiFiServer server(80);  // configure for web server port (80)
+
+void setupOLED() {
+
+  if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3D)) {  // I2C address 0x3D
+    Serial.println(F("SSD1306 allocation failed"));
+    for(;;);  // in case fail to initialise
+  }
+
+  display.clearDisplay();
+  display.setTextSize(2);
+  display.setTextColor(SSD1306_WHITE);
+  display.setCursor(0,0);
+
+}
+
+void setupTime() {
+  // Initialize the NTP
+  configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+}
+
+// initialise gas sensor
+void setupMQ5() {
+  pinMode(MQ5_PIN, INPUT);  // Set the MQ5 pin to input mode
+}
+
+// initialise buzzer
+void setupBuzzer() {
+  pinMode(BUZZER_PIN, OUTPUT);
+}
+
+void setupMotor() {
+  // Allow allocation of all timers
+	ESP32PWM::allocateTimer(0);
+	ESP32PWM::allocateTimer(1);
+	ESP32PWM::allocateTimer(2);
+	ESP32PWM::allocateTimer(3);
+	myservo.setPeriodHertz(50);    // standard 50 hz servo
+	myservo.attach(servoPin, 1000, 2000);
+}
+
+// gas level
+int readGasLevel() {
+  return analogRead(MQ5_PIN);  
+}
+
+// Function to control the LED based on the gas level
+void controlLED(int gasLevel) {
+  if (gasLevel > GAS_THRESHOLD) {
+    digitalWrite(LED_PIN, HIGH);  // If gas is detected, turn on the LED
+  } else {
+    digitalWrite(LED_PIN, LOW);   // If no gas is detected, turn off the LED
+  }
+}
+
+// Function to print the gas level to the serial monitor
+void printGasLevel(int gasLevel) {
+  Serial.print("Gas Level: ");
+  Serial.println(gasLevel);  // Print the gas level to the serial monitor
+}
+
+// WiFi connection function
+void connectToWiFi() {
+  Serial.println("Connecting to WiFi...");
+  WiFi.begin(ssid, password);
+  
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(5000);
+    Serial.println("Connecting...");
+    Serial.println(WiFi.status());
+  }
+  
+  Serial.println("WiFi connected!");
+  Serial.print("IP Address: ");
+  Serial.println(WiFi.localIP());
+}
+
+void sendingRequest(int gasLevel) {
+
+  HTTPClient http;
+    http.begin("http://13.54.129.74:5000/add"); // Replace with your URL
+    http.addHeader("Content-Type", "application/json");  // header configuration
+
+    String postData = "{\"gas_level\":" + String(gasLevel) + ",\"gas_type\":\"MQ5\",\"sensor_id\":\"1\"}";   // JSON data
+
+    int httpResponseCode = http.POST(postData);  // POST request
+
+    if (httpResponseCode > 0) {
+      String payload = http.getString();
+      //Serial.println(payload);  // Print response payload
+    } else {
+      Serial.print("Error on sending POST request: ");
+      Serial.println(httpResponseCode);
+    }
+
+    http.end();  // Close connection
+
+}
+
+void displayGasLevel(int gasLevel) {
+
+    struct tm timeinfo;
+    if (!getLocalTime(&timeinfo)) {
+      Serial.println("Failed to obtain time");
+      return;
+    }
+
+    int hour = timeinfo.tm_hour;  // Get current hour
+
+    display.clearDisplay();
+    display.setCursor(0, 0);
+
+    if (gasLevel > GAS_THRESHOLD) {
+      display.println("Gas leakage detected\n");
+      display.setTextSize(1);  // text size
+      display.println(gasLevel);  // print gas level
+    }
+    else {
+      display.setTextSize(2);  
+      if (hour >= 6 && hour <= 11){
+        display.println("Good Morning!");
+      }
+      else if (hour >= 12 && hour <= 16) {
+        display.println("Good Afternoon!");
+      }
+      else if (hour >= 17 && hour <= 22) {
+          display.println("Good Evening!");
+      }
+      else {
+          display.println("Good Night!");
+      }
+    }
+
+    display.display();  // OLED display update
+    delay(1000);  // 1 second delay
+
+}
+
+void buzzerContorl(int gasLevel) {
+
+  if (gasLevel > GAS_THRESHOLD) {
+    digitalWrite(BUZZER_PIN, HIGH);  // Turn on buzzer
+  } else {
+    digitalWrite(BUZZER_PIN, LOW);   // Turn off buzzer
+  }
+  
+
+}
+
+void servoClose(int gasLevel) {
+
+  if (gasLevel > GAS_THRESHOLD){
+    if (pos == 0) {
+	    for (pos = 0; pos <= 180; pos += 1) { // goes from 0 degrees to 180 degrees
+		    // in steps of 1 degree
+		    myservo.write(pos);    // tell servo to go to position in variable 'pos'
+		    delay(15);             // waits 15ms for the servo to reach the position
+	    }
+    }
+    else{
+      return;
+    }
+  }
+}
+
+void setup() {
+
+  Serial.begin(115200);  // start serial monitor
+  setupMQ5();            // Initialise the MQ5 sensor
+  connectToWiFi();       // connect to WIFI
+  setupOLED();
+  setupBuzzer();
+  setupMotor();
+  setupTime();
+
+}
+
+void loop() {
+
+  int gasLevel = readGasLevel();  // Read the gas level
+  sendingRequest(gasLevel);
+  printGasLevel(gasLevel);        // Print the gas level
+  displayGasLevel(gasLevel);
+  buzzerContorl(gasLevel);
+  servoClose(gasLevel);
+  delay(1000);  // Wait for 1 second
+
+}

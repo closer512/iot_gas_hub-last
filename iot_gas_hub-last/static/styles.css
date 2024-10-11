@@ -1,0 +1,108 @@
+/* 全局样式 */
+body {
+    background-color: #000;
+    color: #fff;
+    font-family: Arial, sans-serif;
+    margin: 0; /* 清除默认的 body margin */
+    padding: 0;
+}
+
+/* 页头样式 */
+header {
+    background-color: #333;
+    color: white;
+    padding: 10px 0;
+    position: fixed; /* 将页头固定在页面顶部 */
+    width: 100%; /* 页头宽度与页面保持一致 */
+    top: 0; /* 保证页头在页面最顶端 */
+    z-index: 1000; /* 确保页头在其他内容之上 */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5); /* 添加阴影使页头更明显 */
+}
+
+header nav ul {
+    list-style-type: none;
+    display: flex;
+    justify-content: center;
+    margin: 0;
+    padding: 0;
+}
+
+header nav ul li {
+    margin: 0 15px;
+}
+
+header nav ul li a {
+    color: white;
+    text-decoration: none;
+}
+
+/* 表格样式 */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px; /* 给表格与其他内容留出间距 */
+}
+
+table th, table td {
+    border: 1px solid #fff;
+    padding: 8px; /* 减少 padding 以避免过厚的表头 */
+    text-align: left;
+    font-weight: normal; /* 使表头字体不加粗 */
+}
+
+/* 表头样式 */
+table th {
+    background-color: #444; /* 使表头背景与其他部分略有不同 */
+    font-weight: normal; /* 取消表头默认的加粗 */
+    padding: 10px 8px; /* 控制表头的 padding */
+}
+
+/* Canvas 样式 */
+canvas {
+    margin: 20px 0;
+}
+
+/* 布局样式 */
+main {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* 定义两列 */
+    grid-template-rows: auto auto; /* 两行自动调整 */
+    grid-gap: 20px; /* 设置网格之间的间距 */
+    padding: 20px;
+    margin-top: 60px; /* 留出足够空间给固定的页头 */
+}
+
+/* 仪表盘放在左上方 */
+#gas-level {
+    grid-column: 1 / 2; /* 第一列 */
+    grid-row: 1 / 2; /* 第一行 */
+    text-align: center;
+}
+
+/* Peak Gas Levels 放在仪表盘下方 */
+#peak-gas-levels {
+    grid-column: 1 / 2; /* 第一列 */
+    grid-row: 2 / 3; /* 第二行 */
+    text-align: center;
+}
+
+/* 趋势图放在右上方 */
+#trend-graph {
+    grid-column: 2 / 3; /* 第二列 */
+    grid-row: 1 / 2; /* 第一行 */
+    text-align: center;
+}
+
+/* 列表放在趋势图下方 */
+#alerts {
+    grid-column: 2 / 3; /* 第二列 */
+    grid-row: 2 / 3; /* 第二行 */
+    text-align: center;
+    padding: 20px;
+}
+
+/* 标题样式 */
+h1, h2, h3 {
+    margin: 0;
+    font-weight: normal; /* 取消标题加粗 */
+}

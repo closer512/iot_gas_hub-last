@@ -1,0 +1,106 @@
+/* 全局样式 */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+}
+
+/* 页头样式 */
+header {
+    background-color: #333;
+    color: white;
+    padding: 15px 0;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 1000;
+}
+
+header nav ul {
+    list-style-type: none;
+    display: flex;
+    justify-content: center;
+    margin: 0;
+    padding: 0;
+}
+
+header nav ul li {
+    margin: 0 15px;
+}
+
+header nav ul li button {
+    background-color: transparent;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+header nav ul li button:hover {
+    color: #aaa;
+}
+
+/* 主内容样式 */
+.main {
+    margin: 20px auto;
+    max-width: 1200px;
+    padding: 20px;
+    margin-top: 90px; /* 确保页头不会覆盖内容 */
+}
+
+/* 表格样式 */
+table {
+    width: 100%;
+    border-collapse: collapse; /* 确保表格的边框紧密连接 */
+    margin-top: 10px;
+}
+
+/* 表头和单元格的边框和填充 */
+table th, table td {
+    padding: 12px;
+    border: 1px solid #ddd; /* 为表头和单元格添加一致的边框 */
+    text-align: left;
+    vertical-align: middle;
+}
+
+/* 表头样式 */
+table th {
+    background-color: #333; /* 表头背景色 */
+    color: white; /* 表头文本颜色 */
+    vertical-align: bottom;
+}
+
+/* 控制搜索框样式，确保与列对齐 */
+table th input[type="text"] {
+    width: 100%; /* 强制搜索框宽度与列一致 */
+    padding: 8px; /* 添加适当的内边距 */
+    margin: 0; /* 去掉外边距 */
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box; /* 确保宽度考虑了边框和内边距 */
+}
+
+/* 行交替背景色 */
+table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+/* 等级颜色样式 */
+.issues-level {
+    color: black;
+}
+
+.blue-level {
+    color: #00A9E0; /* 蓝色 */
+}
+
+.yellow-level {
+    color: #FFDD00; /* 黄色 */
+}
+
+.red-level {
+    color: #FF0000; /* 红色 */
+}
+
